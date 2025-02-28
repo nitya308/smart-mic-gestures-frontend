@@ -12,8 +12,6 @@ var duomo = {
   }
 };
 
-console.log("HEREEE HELLO");
-
 // Initialize OpenSeadragon viewer
 var viewer = OpenSeadragon({
   id: "seadragon-viewer",
@@ -35,6 +33,8 @@ const socket = io("http://localhost:8000", { transports: ["websocket", "polling"
 // OpenSeadragon viewer dimensions
 const IMAGE_WIDTH = 13920;
 const IMAGE_HEIGHT = 10200;
+
+let cursor;
 
 socket.on("coordinates", function (data) {
   if (typeof data.x !== "number" || typeof data.y !== "number") {
@@ -61,9 +61,25 @@ socket.on("coordinates", function (data) {
   // Convert image coordinates to viewport coordinates
   let viewportPoint = normalizedToViewport(data.x, data.y);
 
-   // Check if we need to start a new drawing path
-   if (data.newPath) {
+
+  // Remove existing cursor if present
+  if (cursor) {
+    cursor.remove();
+  }
+
+  // Check if we need to start a new drawing path
+  if (data.newPath) {
     drawingPoints = []; // Reset the path to start fresh
+  }
+
+  if (data.cursor) {
+    cursor = d3.select(overlay.node()).append("circle")
+      .attr("cx", viewportPoint.x)
+      .attr("cy", viewportPoint.y)
+      .attr("r", 0.003)  // Slightly larger radius for visibility
+      .style("fill", "red")
+      .style("opacity", 1);
+
   }
 
   if (drawingPoints.length > 0) {
