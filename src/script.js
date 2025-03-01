@@ -36,6 +36,8 @@ const IMAGE_HEIGHT = 10200;
 
 let cursor;
 
+const MAX_POINTS = 500;  // Limit number of points drawn
+
 socket.on("coordinates", function (data) {
   if (typeof data.x !== "number" || typeof data.y !== "number") {
     console.error("Invalid data received:", data);
@@ -79,7 +81,7 @@ socket.on("coordinates", function (data) {
       .attr("r", 0.003)  // Slightly larger radius for visibility
       .style("fill", "red")
       .style("opacity", 1);
-
+    return;
   }
 
   if (drawingPoints.length > 0) {
@@ -104,4 +106,13 @@ socket.on("coordinates", function (data) {
     .attr("r", 0.0003)  // Scale based on zoom
     .style("fill", "#00ff00")
     .style("opacity", 0.8);
+});
+
+// Event listener to clear drawing on key press "3"
+document.addEventListener("keydown", function(event) {
+  if (event.key === "3") {
+    drawingPoints = [];
+    d3.select(overlay.node()).selectAll("*").remove();
+    console.log("Canvas cleared");
+  }
 });
